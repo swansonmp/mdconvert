@@ -71,7 +71,7 @@ readBlock ('-':'-':'-':cs) = HR
 readBlock ('!':'(':cs) = parseImg ('!':'(':cs)
 readBlock ('+':'(':cs) = parseVideo ('+':'(':cs)
 readBlock ('@':'(':cs) = parseAudio ('@':'(':cs)
-readBlock ('<':' ':cs) = Blockquote [P [Text (readInline (init (init cs)))]]
+readBlock ('>':' ':cs) = Blockquote [P [Text (readInline cs)]]
 readBlock s         = P [Text (readInline s)]
 
 
