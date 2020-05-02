@@ -3,6 +3,8 @@
 
 import Data.List.Split (splitOn)
 import Data.Char (isSpace)
+import System.IO
+import System.Environment
 
 type Text = String
 type Href = String
@@ -104,6 +106,7 @@ parser ts = let (x,y) = sr (ts,[])
                     [Err]      -> Nothing
                     _          -> Nothing                    
 
+-- Converts a list of tags into an HTML String
 toString :: [Tag] -> String
 toString ((H1 s):ts) = "<h1>" ++ s ++ "</h1>\n" ++ (toString ts)
 toString ((H2 s):ts) = "<h2>" ++ s ++ "</h2>\n" ++ (toString ts)
@@ -135,13 +138,16 @@ convert :: String -> Maybe String
 --convert s = parser (lexer s)
 convert s = Just (wrap (toString (lexer s)))
 
+-- Main function
 main = do
-    contents <- getContents
+    (infile:args) <- getArgs
+    handle <- openFile infile ReadMode
+    contents <- hGetContents handle
     let result = convert contents
-    --let result = Just (concat (preproc contents))
     case result of
         Just output ->
-            writeFile "output.html" (output)
+            if args /= []
+                then writeFile (head args) output
+                else writeFile (((splitOn "." infile) !! 0) ++ ".html") output
         Nothing -> putStrLn "Error"
-
 
