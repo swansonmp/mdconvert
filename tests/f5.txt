@@ -61,7 +61,7 @@ And an audio file?
 
 @(audio.mp3)
 
-> I sure hope block-quotes are supported! >
+> I sure hope block-quotes are supported!
 
 Inline <abbr title="Hypertext Markup Language">HTML</abbr> should
 also be supported!

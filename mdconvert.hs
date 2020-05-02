@@ -2,13 +2,11 @@
 -- Matthew Swanson
 
 import Data.List.Split (splitOn)
-import Data.Text (strip)
+import Data.Char (isSpace)
 
 type Text = String
 type Href = String
---type Alt = String
---type Title = String
-type Src = String
+type Src  = String
 type Type = String
 
 data Tag = H1 String
@@ -25,7 +23,7 @@ data Tag = H1 String
          | Img Src
          | Video Src Type
          | Audio Src Type
-         | Blockquote Text
+         | Blockquote [Tag]
          | A Href Text
          | UL [Tag]
          | OL [Tag]
@@ -47,18 +45,19 @@ replace c r (h:s)
     | otherwise = h : (replace c r s)
 replace c r [] = ""
 
-getImgAttributes :: String -> String
-getImgAttributes s = init (drop 2 s)
+getSrc :: String -> String
+getSrc s = init (drop 2 s)
 
 parseImg :: String -> Tag
-parseImg s = Img src
-                where src = getImgAttributes s
+parseImg s = Img (getSrc s)
 
 parseVideo :: String -> Tag
-parseVideo s = Video "video.mp4" "mp4"
+parseVideo s = Video src ((splitOn "." src) !! 1)
+                where src = getSrc s
 
 parseAudio :: String -> Tag
-parseAudio s = Audio "audio.mp3" "mp3"
+parseAudio s = Audio src ((splitOn "." src) !! 1)
+                where src = getSrc s
 
 -- Converts a single string into a token, producing error on non-tokens
 readBlock :: String -> Tag
@@ -72,20 +71,25 @@ readBlock ('-':'-':'-':cs) = HR
 readBlock ('!':'(':cs) = parseImg ('!':'(':cs)
 readBlock ('+':'(':cs) = parseVideo ('+':'(':cs)
 readBlock ('@':'(':cs) = parseAudio ('@':'(':cs)
-readBlock ('<':' ':cs) = if last cs == '>' 
-                             then Blockquote (init cs)
-                             else P [Text (readInline ('<':' ':cs))]
+readBlock ('<':' ':cs) = Blockquote [P [Text (readInline (init (init cs)))]]
 readBlock s         = P [Text (readInline s)]
 
 
 lexer :: String -> [Tag]
 lexer s = map readBlock (preproc s)
 
+-- Naive strip method
+-- Credit: Eric Normand
+-- https://stackoverflow.com/a/6270337
+strip :: String -> String
+strip = f . f
+        where f = reverse . dropWhile isSpace
+
 -- Takes in an input string and splits it into 'blocks'
 -- A block is a contiguous group of text deliniated by two newlines
--- Additionally, a newline is added before single newlines
+-- Additionally, a space is added before single newlines
 preproc :: String -> [String]
-preproc s = [addSpacesBeforeNewline b | b <- (splitOn "\n\n" s)]
+preproc s = [strip (addSpacesBeforeNewline b) | b <- (splitOn "\n\n" s)]
 
 -- Adds spaces before every newline character
 addSpacesBeforeNewline :: String -> String
@@ -118,6 +122,7 @@ toString ((Audio src type_):ts) = "<p><audio controls>\n\t<source src=\"" ++ src
                                     ++ "\" type=\"audio/" ++ type_
                                     ++ "\">\n\tAudio not supported.\n</audio></p>\n"
                                     ++ (toString ts)
+toString ((Blockquote t):ts) = "<blockquote>" ++ (toString t) ++ "</blockquote>\n" ++ (toString ts)
 toString ((P t):ts) = "<p>" ++ (toString t) ++ "</p>\n" ++ (toString ts)
 toString ((Text t):ts) = t
 toString (_:ts) = "" ++ (toString ts)
