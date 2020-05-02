@@ -30,6 +30,9 @@ data Tag = H1 String
          | UL [Tag]
          | OL [Tag]
          | LI [Tag]
+         | Table [Tag]
+         | TR [Tag]
+         | TD [Tag]
          | Text String
          | Out String
          | Err
@@ -67,6 +70,12 @@ parseUL s = UL [LI [P [Text (readInline (strip (tail (tail l))))]] | l <- (lines
 parseOL :: String -> Tag
 parseOL s = OL [LI [P [Text (readInline (strip (tail (tail (tail l)))))]] | l <- (lines s)]
 
+parseTableRow :: String -> Tag
+parseTableRow s = TR [TD [P [Text (readInline d)]] | d <- splitOn "," s]
+
+parseTable :: String -> Tag
+parseTable s = Table (tail (map parseTableRow (lines s)))
+
 -- Converts a single string into a token, producing error on non-tokens
 readBlock :: String -> Tag
 readBlock ('#':'#':'#':'#':'#':'#':cs) = H6 cs
@@ -79,6 +88,7 @@ readBlock ('-':'-':'-':cs) = HR
 readBlock ('!':'(':cs) = parseImg ('!':'(':cs)
 readBlock ('^':'(':cs) = parseVideo ('^':'(':cs)
 readBlock ('@':'(':cs) = parseAudio ('@':'(':cs)
+readBlock ('+':' ':cs) = parseTable cs
 readBlock ('>':' ':cs) = Blockquote [P [Text (readInline cs)]]
 readBlock ('*':' ':cs) = parseUL ('*':' ':cs)
 readBlock s
@@ -138,6 +148,9 @@ toString ((Blockquote t):ts) = "<blockquote>" ++ (toString t) ++ "</blockquote>\
 toString ((UL t):ts) = "<ul>\n" ++ (toString t) ++ "</ul>\n" ++ (toString ts)
 toString ((OL t):ts) = "<ol>\n" ++ (toString t) ++ "</ol>\n" ++ (toString ts)
 toString ((LI t):ts) = "\t<li>" ++ (toString t) ++ "</li>\n" ++ (toString ts)
+toString ((Table t):ts) = "<table>\n" ++ (toString t) ++ "</table>\n" ++ (toString ts)
+toString ((TR t):ts) = "<tr>\n" ++ (toString t) ++ "</tr>\n" ++ (toString ts)
+toString ((TD t):ts) = "<td>\n" ++ (toString t) ++ "</td>\n" ++ (toString ts)
 toString ((P t):ts) = "<p>" ++ (toString t) ++ "</p>\n" ++ (toString ts)
 toString ((Text t):ts) = t
 toString (_:ts) = "" ++ (toString ts)

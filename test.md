@@ -66,5 +66,12 @@ And an audio file?
 Inline <abbr title="Hypertext Markup Language">HTML</abbr> should
 also be supported!
 
+A table? You can do that?
+
++
+Row 0 Col 0, Row 0 Col 1, Row 0 Col 2
+Row 1 Col 0, Row 1 Col 1, Row 1 Col 2
+Row 2 Col 0, Row 2 Col 1, Row 2 Col 2
+
 Goodbye!
 
