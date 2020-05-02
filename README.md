@@ -13,7 +13,7 @@ utilizing special syntax.
 
 * Running `mdconvert` with no arguments or `-h` prints usage information.
 
-> `./mdconvert`
+> `./mdconvert`<br>
 > `usage: mdconvert infile [outfile]`
 
 * To use `mdconvert`, give
@@ -58,8 +58,8 @@ result in `test.html`.
 followed by a space.
 * Nested lists are not supported.
 
-> `* An item`
-> `* Another item`
+> `* An item`<br>
+> `* Another item`<br>
 > `* One more item`
 
 #### Ordered Lists
@@ -68,8 +68,8 @@ followed by a space.
 followed by a `.` and a space.
 * Nested lists are not supported.
 
-> `1. First item`
-> `2. Second item`
+> `1. First item`<br>
+> `2. Second item`<br>
 > `3. Third item`
 
 ### Multimedia
@@ -109,9 +109,9 @@ with additional lines containing data.
 * Data is entered in `CSV` format, meaning that columns
 is delineated by `,` and rows by a new line.
 
-> `+`
-> `R0C0, R0C1, R0C2`
-> `R1C0, R1C1, R1C2`
+> `+`<br>
+> `R0C0, R0C1, R0C2`<br>
+> `R1C0, R1C1, R1C2`<br>
 > `R2C0, R2C1, R2C2`
 
 ### Horizontal Rules
