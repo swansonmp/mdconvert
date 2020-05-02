@@ -140,14 +140,18 @@ convert s = Just (wrap (toString (lexer s)))
 
 -- Main function
 main = do
-    (infile:args) <- getArgs
-    handle <- openFile infile ReadMode
-    contents <- hGetContents handle
-    let result = convert contents
-    case result of
-        Just output ->
-            if args /= []
-                then writeFile (head args) output
-                else writeFile (((splitOn "." infile) !! 0) ++ ".html") output
-        Nothing -> putStrLn "Error"
+    args <- getArgs
+    if args == [] || head args == "-h"
+        then do putStrLn "usage: mdconvert infile [outfile]"
+        else do
+            let infile = head args
+            handle <- openFile infile ReadMode
+            contents <- hGetContents handle
+            let result = convert contents
+            case result of
+                Just output ->
+                    if length args >= 2
+                        then writeFile (args !! 1) output
+                        else writeFile (((splitOn "." infile) !! 0) ++ ".html") output
+                Nothing -> putStrLn "Error"
 
