@@ -41,11 +41,11 @@ Can you do an unordered list?
 
 How about an ordered list?
 
-1. Why certainly?
+1. Why certainly!
 2. This one is a little hacky
 3. But it is working nonetheless!
 
-Here's a link:
+Then a link:
 
 Links can be [inline](https://hoogle.haskell.org)!
 
@@ -55,7 +55,7 @@ And an image!
 
 And a video?
 
-+(video.mp4)
+^(video.mp4)
 
 And an audio file?
 

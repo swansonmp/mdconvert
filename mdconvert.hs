@@ -1,8 +1,8 @@
--- Markdown to HTML Converter
+-- mdconvert
 -- Matthew Swanson
 
 import Data.List.Split (splitOn)
-import Data.Char (isSpace)
+import Data.Char (isSpace, isDigit)
 import System.IO
 import System.Environment
 
@@ -61,6 +61,12 @@ parseAudio :: String -> Tag
 parseAudio s = Audio src ((splitOn "." src) !! 1)
                 where src = getSrc s
 
+parseUL :: String -> Tag
+parseUL s = UL [LI [P [Text (readInline (strip (tail (tail l))))]] | l <- (lines s)]
+
+parseOL :: String -> Tag
+parseOL s = OL [LI [P [Text (readInline (strip (tail (tail (tail l)))))]] | l <- (lines s)]
+
 -- Converts a single string into a token, producing error on non-tokens
 readBlock :: String -> Tag
 readBlock ('#':'#':'#':'#':'#':'#':cs) = H6 cs
@@ -71,11 +77,14 @@ readBlock ('#':'#':cs) = H2 cs
 readBlock ('#':cs)  = H1 cs
 readBlock ('-':'-':'-':cs) = HR
 readBlock ('!':'(':cs) = parseImg ('!':'(':cs)
-readBlock ('+':'(':cs) = parseVideo ('+':'(':cs)
+readBlock ('^':'(':cs) = parseVideo ('^':'(':cs)
 readBlock ('@':'(':cs) = parseAudio ('@':'(':cs)
 readBlock ('>':' ':cs) = Blockquote [P [Text (readInline cs)]]
-readBlock s         = P [Text (readInline s)]
-
+readBlock ('*':' ':cs) = parseUL ('*':' ':cs)
+readBlock s
+    | len > 3 && isDigit (s !! 0) && (s !! 1) == '.' && (s !! 2) == ' ' = parseOL s
+    | otherwise = P [Text (readInline s)]
+        where len = length s
 
 lexer :: String -> [Tag]
 lexer s = map readBlock (preproc s)
@@ -126,6 +135,9 @@ toString ((Audio src type_):ts) = "<p><audio controls>\n\t<source src=\"" ++ src
                                     ++ "\">\n\tAudio not supported.\n</audio></p>\n"
                                     ++ (toString ts)
 toString ((Blockquote t):ts) = "<blockquote>" ++ (toString t) ++ "</blockquote>\n" ++ (toString ts)
+toString ((UL t):ts) = "<ul>\n" ++ (toString t) ++ "</ul>\n" ++ (toString ts)
+toString ((OL t):ts) = "<ol>\n" ++ (toString t) ++ "</ol>\n" ++ (toString ts)
+toString ((LI t):ts) = "\t<li>" ++ (toString t) ++ "</li>\n" ++ (toString ts)
 toString ((P t):ts) = "<p>" ++ (toString t) ++ "</p>\n" ++ (toString ts)
 toString ((Text t):ts) = t
 toString (_:ts) = "" ++ (toString ts)
