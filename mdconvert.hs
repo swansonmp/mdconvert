@@ -18,9 +18,9 @@ data Tag = H1 String
          | H5 String
          | H6 String
          | P [Tag]
-         | Em Text
-         | Strong Text
-         | Code Text
+         | Em [Tag]
+         | Strong [Tag]
+         | Code [Tag]
          | HR
          | Img Src
          | Video Src Type
@@ -34,6 +34,7 @@ data Tag = H1 String
          | TR [Tag]
          | TD [Tag]
          | Text String
+         | PHTML String
          | Out String
          | Err
             deriving Show
@@ -41,8 +42,74 @@ data Tag = H1 String
 sr :: ([Tag], [Tag]) -> ([Tag], [Tag])
 sr s = ([], [])
 
-readInline :: String -> String
-readInline s = replace '<' "&lt;" (replace '>' "&gt;" s)
+-- Stack and Stack operations
+-----------------------------
+type Stack = [String]
+
+push :: String -> Stack -> Stack
+push s stack = s : stack
+
+pop :: Stack -> (String, Stack)
+pop (top:stack) = (top, stack)
+pop []          = ("", [])
+
+empty :: Stack -> Bool
+empty stack = stack == []
+-----------------------------
+
+notSyntaxChar:: Char -> Bool
+notSyntaxChar s
+    | s == '*'  = False
+    | s == '_'  = False
+    | s == '`'  = False 
+    | s == '~'  = False 
+    | otherwise = True
+
+isSyntaxSymbol :: String -> Bool
+isSyntaxSymbol s
+    | s == "**" = True
+    | s == "_"  = True
+    | s == "`"  = True
+    | s == "~~" = True
+    | otherwise = False
+
+getTagName :: String -> String
+getTagName s
+    | s == "**" = "strong"
+    | s == "_"  = "em"
+    | s == "`"  = "code"
+    | s == "~~" = "strike"
+    | otherwise = error "getTagName: Invalid input"
+
+
+splitOnInlineSyntax :: String -> [String]
+splitOnInlineSyntax ""          = []
+splitOnInlineSyntax ('_':s)     = "_"  : splitOnInlineSyntax s
+splitOnInlineSyntax ('`':s)     = "`"  : splitOnInlineSyntax s
+splitOnInlineSyntax ('*':'*':s) = "**" : splitOnInlineSyntax s
+splitOnInlineSyntax ('~':'~':s) = "~~" : splitOnInlineSyntax s
+splitOnInlineSyntax ('*':s) = ('*':words) : splitOnInlineSyntax rest
+                                where (words, rest) = (takeWhile (notSyntaxChar) s, dropWhile (notSyntaxChar) s)
+splitOnInlineSyntax ('~':s) = ('~':words) : splitOnInlineSyntax rest
+                                where (words, rest) = (takeWhile (notSyntaxChar) s, dropWhile (notSyntaxChar) s)
+splitOnInlineSyntax s       = words : splitOnInlineSyntax rest
+                                where (words, rest) = (takeWhile (notSyntaxChar) s, dropWhile (notSyntaxChar) s)
+                                    
+
+readInlineHelper :: [String] -> Stack -> String
+readInlineHelper (s:ss) stack = if s == top
+                                    then "</" ++ (getTagName s) ++ ">" 
+                                            ++ readInlineHelper ss newStack
+                                    else if isSyntaxSymbol s
+                                        then "<" ++ (getTagName s) ++ ">" 
+                                                ++ readInlineHelper ss (push s stack)
+                                        else s ++ readInlineHelper ss stack
+                                            where (top, newStack) = pop stack
+readInlineHelper []     stack = ""
+
+readInline :: String -> [Tag]
+--readInline s = [Text (replace '<' "&lt;" (replace '>' "&gt;" s))]
+readInline s = [PHTML (readInlineHelper (splitOnInlineSyntax s) [])]
 
 replace :: Char -> String -> String -> String
 replace c r (h:s)
@@ -65,13 +132,13 @@ parseAudio s = Audio src ((splitOn "." src) !! 1)
                 where src = getSrc s
 
 parseUL :: String -> Tag
-parseUL s = UL [LI [P [Text (readInline (strip (tail (tail l))))]] | l <- (lines s)]
+parseUL s = UL [LI [P (readInline (strip (tail (tail l))))] | l <- (lines s)]
 
 parseOL :: String -> Tag
-parseOL s = OL [LI [P [Text (readInline (strip (tail (tail (tail l)))))]] | l <- (lines s)]
+parseOL s = OL [LI [P (readInline (strip (tail (tail (tail l)))))] | l <- (lines s)]
 
 parseTableRow :: String -> Tag
-parseTableRow s = TR [TD [P [Text (readInline d)]] | d <- splitOn "," s]
+parseTableRow s = TR [TD [P (readInline d)] | d <- splitOn "," s]
 
 parseTable :: String -> Tag
 parseTable s = Table (tail (map parseTableRow (lines s)))
@@ -89,11 +156,11 @@ readBlock ('!':'(':cs) = parseImg ('!':'(':cs)
 readBlock ('^':'(':cs) = parseVideo ('^':'(':cs)
 readBlock ('@':'(':cs) = parseAudio ('@':'(':cs)
 readBlock ('+':' ':cs) = parseTable cs
-readBlock ('>':' ':cs) = Blockquote [P [Text (readInline cs)]]
+readBlock ('>':' ':cs) = Blockquote [P (readInline cs)]
 readBlock ('*':' ':cs) = parseUL ('*':' ':cs)
 readBlock s
     | len > 3 && isDigit (s !! 0) && (s !! 1) == '.' && (s !! 2) == ' ' = parseOL s
-    | otherwise = P [Text (readInline s)]
+    | otherwise = P (readInline s)
         where len = length s
 
 lexer :: String -> [Tag]
@@ -153,6 +220,7 @@ toString ((TR t):ts) = "<tr>\n" ++ (toString t) ++ "</tr>\n" ++ (toString ts)
 toString ((TD t):ts) = "<td>\n" ++ (toString t) ++ "</td>\n" ++ (toString ts)
 toString ((P t):ts) = "<p>" ++ (toString t) ++ "</p>\n" ++ (toString ts)
 toString ((Text t):ts) = t
+toString ((PHTML t):ts) = t ++ (toString ts)
 toString (_:ts) = "" ++ (toString ts)
 toString [] = ""
                     
