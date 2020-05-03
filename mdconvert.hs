@@ -107,9 +107,22 @@ readInlineHelper (s:ss) stack = if s == top
                                             where (top, newStack) = pop stack
 readInlineHelper []     stack = ""
 
+hasInlineHTML :: String -> Stack -> Bool
+hasInlineHTML ('<':s) stack = if not (empty stack)
+                                  then False
+                                  else hasInlineHTML s (push "<" stack)
+hasInlineHTML ('>':s) stack = if empty stack
+                                  then False
+                                  else hasInlineHTML s newStack
+                                      where (top, newStack) = pop stack
+hasInlineHTML (c:s)   stack = hasInlineHTML s stack
+hasInlineHTML []      stack = empty stack
+
 readInline :: String -> [Tag]
---readInline s = [Text (replace '<' "&lt;" (replace '>' "&gt;" s))]
-readInline s = [PHTML (readInlineHelper (splitOnInlineSyntax s) [])]
+readInline s = if hasInlineHTML s []
+                   then [PHTML (readInlineHelper (splitOnInlineSyntax s) [])]
+                   else [PHTML (readInlineHelper (splitOnInlineSyntax s') [])]
+                       where s' = replace '<' "&lt;" (replace '>' "&gt;" s)
 
 replace :: Char -> String -> String -> String
 replace c r (h:s)

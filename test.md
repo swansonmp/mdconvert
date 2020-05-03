@@ -66,6 +66,9 @@ And an audio file?
 Inline <abbr title="Hypertext Markup Language">HTML</abbr> should
 also be supported!
 
+However, normal uses of `>` and `<` are preserved!  
+`1 + 2 > 0`.
+
 A table? You can do that?
 
 +
