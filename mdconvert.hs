@@ -1,6 +1,7 @@
 -- mdconvert
 -- Matthew Swanson
 
+import Data.List (intercalate)
 import Data.List.Split (splitOn)
 import Data.Char (isSpace, isDigit)
 import System.IO
@@ -120,15 +121,15 @@ hasInlineHTML []      stack = empty stack
 
 readInline :: String -> [Tag]
 readInline s = if hasInlineHTML s []
-                   then [PHTML (readInlineHelper (splitOnInlineSyntax s) [])]
-                   else [PHTML (readInlineHelper (splitOnInlineSyntax s') [])]
-                       where s' = replace '<' "&lt;" (replace '>' "&gt;" s)
+                   then [PHTML (replace "   \n" "<br>\n" (readInlineHelper (splitOnInlineSyntax s) []))]
+                   else [PHTML (replace "   \n" "<br>\n" (readInlineHelper (splitOnInlineSyntax s') []))]
+                       where s' = replace "<" "&lt;" (replace ">" "&gt;" s)
 
-replace :: Char -> String -> String -> String
-replace c r (h:s)
-    | c == h    = r ++ (replace c r s)
-    | otherwise = h : (replace c r s)
-replace c r [] = ""
+-- Replace Method
+-- Credit: Santa Claus
+-- https://stackoverflow.com/a/49261236
+replace :: String -> String -> String -> String
+replace from to = intercalate to . splitOn from
 
 getSrc :: String -> String
 getSrc s = init (drop 2 s)
