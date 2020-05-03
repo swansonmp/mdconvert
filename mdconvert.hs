@@ -239,28 +239,69 @@ toString ((Text t):ts) = t
 toString ((PHTML t):ts) = t ++ (toString ts)
 toString (_:ts) = "" ++ (toString ts)
 toString [] = ""
-                    
-wrap :: String -> String
-wrap s = "<html>\n" ++ s ++ "</html>\n"
+
+wrap :: String -> String -> String
+wrap w s = "<" ++ w ++ ">\n" ++ s ++ "</" ++ w ++ ">\n"
 
 convert :: String -> Maybe String
 --convert s = parser (lexer s)
-convert s = Just (wrap (toString (lexer s)))
+convert s = Just (wrap "html" (toString (lexer s)))
+
+sconvert :: String -> String -> Maybe String
+sconvert s style = Just (wrap "html" ((wrap "head" (wrap "style" style)) 
+                       ++ (wrap "body" (toString (lexer s)))))
+
+printUsage :: IO ()
+printUsage = putStrLn "usage: mdconvert infile [outfile] [-s stylefile]"
 
 -- Main function
 main = do
     args <- getArgs
-    if args == [] || head args == "-h"
-        then do putStrLn "usage: mdconvert infile [outfile]"
+    if args == [] || head (head args) == '-'
+        then do printUsage
+        -- infile present
         else do
             let infile = head args
-            handle <- openFile infile ReadMode
-            contents <- hGetContents handle
-            let result = convert contents
-            case result of
-                Just output ->
-                    if length args >= 2
-                        then writeFile (args !! 1) output
-                        else writeFile (((splitOn "." infile) !! 0) ++ ".html") output
-                Nothing -> putStrLn "Error"
+            inhandle <- openFile infile ReadMode
+            incontents <- hGetContents inhandle
+            if length args == 1
+                -- No outfile; no style
+                -- mdconvert in
+                then do
+                    let result = convert incontents
+                    case result of
+                        Just output -> writeFile (((splitOn "." infile) !! 0) ++ ".html") output
+                        Nothing     -> putStrLn "Error"
+                else if length args == 3 && args !! 1 == "-s" && head (args !! 2) /= '-'
+                    -- No outfile; with style
+                    -- mdconvert in -s style
+                    then do
+                        let sfile = args !! 2
+                        shandle <- openFile sfile ReadMode
+                        scontents <- hGetContents shandle
+                        let result = sconvert incontents scontents
+                        case result of
+                            Just output -> writeFile (((splitOn "." infile) !! 0) ++ ".html") output
+                            Nothing     -> putStrLn "Error"
+                    else if length args == 4 && head (args !! 1) /= '-' 
+                                && args !! 2 == "-s" && head (args !! 3) /= '-'
+                        -- Outfile present; with style
+                        -- mdconvert in out -s style
+                        then do
+                            let sfile = args !! 3
+                            shandle <- openFile sfile ReadMode
+                            scontents <- hGetContents shandle
+                            let result = sconvert incontents scontents
+                            case result of
+                                Just output -> writeFile (args !! 1) output
+                                Nothing     -> putStrLn "Error"
+                        -- Outfile present; no style
+                        -- mdconvert in out
+                        else if length args == 2 && head (args !! 1) /= '-'
+                            then do
+                                let result = convert incontents
+                                case result of
+                                    Just output -> writeFile (args !! 1) output
+                                    Nothing     -> putStrLn "Error"
+                            else do printUsage
 

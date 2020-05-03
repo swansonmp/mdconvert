@@ -1,7 +1,7 @@
 # mdconvert
 
-* `mdconvert` is a primitive Markdown conversion tool
-utilizing special syntax.
+* `mdconvert` is a Markdown conversion tool
+with extra features and special syntax.
 
 ## Compiling mdconvert
 
@@ -14,7 +14,7 @@ utilizing special syntax.
 * Running `mdconvert` with no arguments or `-h` prints usage information.
 
 > `./mdconvert`<br>
-> `usage: mdconvert infile [outfile]`
+> `usage: mdconvert infile [outfile] [-s stylefile]`
 
 * To use `mdconvert`, give
 an input file name and an output file name.
@@ -31,22 +31,43 @@ the result in the newly-created `output.html`.
 * This will convert the contents of `test.md` and store the
 result in `test.html`.
 
+### Embedding Stylesheets with mdconvert
+
+* Stylesheets can be embedded into output files by using the `-s` flag,
+then giving the stylesheet's file name.
+
+> `./mdconvert test.md output.html -s style.css`
+
+* This will convert the contents of `test.md` and store the result in `output.html`
+while embedding `style.css` in `output.html`.
+
+> `./mdconvert test.md -s style.css`
+
+* This will convert the contents of `test.md` and store the result in `test.html`
+while embedding `style.css` in `test.html`.
+
 ## mdconvert's Syntax
 
 ### Paragraphs
 
 * Normal text is parsed as paragraph.
 * Paragraphs are separated by a blank line.
+* Lines breaks can be inserted by putting two spaces
+at the end of a line.
 
 ### Headings 
 
 * Headings are inserted at the beginning of a paragraph using the `#` character.
 * The heading level is determined by the number of `#` symbols.
-* This example produces an `<h1>`:
+* The below example produces an `<h1>`:
 
 > `# Level 1 Heading`
 
-* This example produces an `<h6>`:
+* The below example produces an `<h2>`:
+
+> `## Level 2 Heading`
+
+* The below example produces an `<h6>`:
 
 > `###### Level 6 Heading`
 
@@ -68,11 +89,11 @@ result in `test.html`.
 
 * Surround text with `` ` ``.
 
-> `Monospacing the word `` ` ``monospace`` ` ``.`
+> ``Monospacing the word `monospace`.``
 
 #### Strikethrough
 
-* Surround with `~~`.
+* Surround text with `~~`.
 
 > `Striking through the word ~~strikethrough~~`
 
@@ -99,6 +120,12 @@ followed by a `.` and a space.
 > `1. First item`<br>
 > `2. Second item`<br>
 > `3. Third item`
+
+### Links
+
+* I sure hope I put something here later!
+
+> `[["https://github.com/swansonmp/mdconvert" "mdconvert"]]`
 
 ### Multimedia
 
