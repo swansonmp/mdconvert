@@ -3,3 +3,4 @@ mdconvert.hi
 mdconvert.o
 *.txt
 *.html
+*.css
