@@ -50,12 +50,39 @@ result in `test.html`.
 
 > `###### Level 6 Heading`
 
+### Emphasis
+
+#### Bold
+
+* Surround text with `**`.
+
+> `Bolding the word **bold**.`
+
+#### Italics
+
+* Surround text with `_`.
+
+> `Italicizing the word _italics_.`
+
+#### Monospace/Code
+
+* Surround text with `` ` ``.
+
+> `Monospacing the word `` ` ``monospace`` ` ``.`
+
+#### Strikethrough
+
+* Surround with `~~`.
+
+> `Striking through the word ~~strikethrough~~`
+
 ### Lists
 
 #### Unordered Lists
 
 * Unordered lists are inserted using the `*` character
 followed by a space.
+* Unordered lists must be in their own paragraph.
 * Nested lists are not supported.
 
 > `* An item`<br>
@@ -66,6 +93,7 @@ followed by a space.
 
 * Ordered lists are inserted using a numeric character
 followed by a `.` and a space.
+* Ordered lists must be in their own paragraph.
 * Nested lists are not supported.
 
 > `1. First item`<br>
@@ -78,12 +106,14 @@ followed by a `.` and a space.
 
 * Images are simplified in `mdconvert`.
 * Only the `!`, source, and parenthesis are required.
+* Images must be in their own paragraph.
 
 > `!(image.png)`
 
 #### Videos
 
 * Videos are similar to images, except they use the `^` character.
+* Video must be in its own paragraph.
 * Videos are added with a `320x240` resolution and with controls.
 * All video formats supported by HTML are supported by `mdconvert`.
 * Browsers that do not support the `<video>` tag will display an error message.
@@ -93,6 +123,7 @@ followed by a `.` and a space.
 #### Audio
 
 * Audio is similar to both images and video, except using the `@` character.
+* Audio must be in its own paragraph.
 * Audio is added with controls.
 * All audio formats supported by HTML are supported by `mdconvert`.
 * Browsers that do not support the `<audio>` tag will display an error message.
@@ -103,11 +134,11 @@ followed by a `.` and a space.
 
 * Tables are an addition to `mdconvert`,
 and are easier to use than `reStructuredText`.
-* Tables must be on their own paragraph.
+* Tables must be in their own paragraph.
 * The first line of the table must be a `+`,
 with additional lines containing data.
 * Data is entered in `CSV` format, meaning that columns
-is delineated by `,` and rows by a new line.
+are delineated by `,` and rows by a new line.
 
 > `+`<br>
 > `R0C0, R0C1, R0C2`<br>
@@ -116,6 +147,13 @@ is delineated by `,` and rows by a new line.
 
 ### Horizontal Rules
 
-* Horizontal rules are inserted using `---`.
+* Horizontal rules are inserted using `---`, `***`, or `___`.
+* Horizontal rules must be in their own paragraph.
 
 > `---`
+
+> `***`
+
+> `___`
+
+
