@@ -197,5 +197,5 @@ are delineated by `,` and rows by a new line.
 
 ### License
 
-* [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+* MIT
 
