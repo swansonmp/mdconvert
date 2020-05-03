@@ -1,3 +1,6 @@
+_I am a conventional Markdown document!_  
+_[View me on Github!](https://github.com/swansonmp/mdconvert)_
+
 # mdconvert
 
 * `mdconvert` is a Markdown conversion tool
@@ -194,5 +197,5 @@ are delineated by `,` and rows by a new line.
 
 ### License
 
-* MIT
+* [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
