@@ -1,6 +1,6 @@
-mdconvert
 mdconvert.hi
 mdconvert.o
 *.txt
 *.html
 *.css
+*.sh

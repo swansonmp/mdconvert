@@ -47,7 +47,7 @@ How about an ordered list?
 
 Then a link:
 
-Links can be [inline](https://hoogle.haskell.org)!
+Links can be [["https://github.com/swansonmp/mdconvert" "inline"]]!
 
 And an image!
 
