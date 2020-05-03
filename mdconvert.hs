@@ -12,12 +12,12 @@ type Href = String
 type Src  = String
 type Type = String
 
-data Tag = H1 String
-         | H2 String
-         | H3 String
-         | H4 String
-         | H5 String
-         | H6 String
+data Tag = H1 [Tag]
+         | H2 [Tag]
+         | H3 [Tag]
+         | H4 [Tag]
+         | H5 [Tag]
+         | H6 [Tag]
          | P [Tag]
          | Em [Tag]
          | Strong [Tag]
@@ -178,12 +178,12 @@ parseTable s = Table (tail (map parseTableRow (lines s)))
 
 -- Converts a single string into a token, producing error on non-tokens
 readBlock :: String -> Tag
-readBlock ('#':'#':'#':'#':'#':'#':' ':cs) = H6 cs
-readBlock ('#':'#':'#':'#':'#':' ':cs) = H5 cs
-readBlock ('#':'#':'#':'#':' ':cs) = H4 cs
-readBlock ('#':'#':'#':' ':cs) = H3 cs
-readBlock ('#':'#':' ':cs) = H2 cs
-readBlock ('#':' ':cs)  = H1 cs
+readBlock ('#':'#':'#':'#':'#':'#':' ':cs) = H6 (readInline cs)
+readBlock ('#':'#':'#':'#':'#':' ':cs)     = H5 (readInline cs)
+readBlock ('#':'#':'#':'#':' ':cs)         = H4 (readInline cs)
+readBlock ('#':'#':'#':' ':cs)             = H3 (readInline cs)
+readBlock ('#':'#':' ':cs)                 = H2 (readInline cs)
+readBlock ('#':' ':cs)                     = H1 (readInline cs)
 readBlock ('-':'-':'-':cs) = HR
 readBlock ('*':'*':'*':cs) = HR
 readBlock ('_':'_':'_':cs) = HR
@@ -229,12 +229,12 @@ parser ts = let (x,y) = sr (ts,[])
 
 -- Converts a list of tags into an HTML String
 toString :: [Tag] -> String
-toString ((H1 s):ts) = "<h1>" ++ s ++ "</h1>\n" ++ (toString ts)
-toString ((H2 s):ts) = "<h2>" ++ s ++ "</h2>\n" ++ (toString ts)
-toString ((H3 s):ts) = "<h3>" ++ s ++ "</h3>\n" ++ (toString ts)
-toString ((H4 s):ts) = "<h4>" ++ s ++ "</h4>\n" ++ (toString ts)
-toString ((H5 s):ts) = "<h5>" ++ s ++ "</h5>\n" ++ (toString ts)
-toString ((H6 s):ts) = "<h6>" ++ s ++ "</h6>\n" ++ (toString ts)
+toString ((H1 s):ts) = "<h1>" ++ (toString s) ++ "</h1>\n" ++ (toString ts)
+toString ((H2 s):ts) = "<h2>" ++ (toString s) ++ "</h2>\n" ++ (toString ts)
+toString ((H3 s):ts) = "<h3>" ++ (toString s) ++ "</h3>\n" ++ (toString ts)
+toString ((H4 s):ts) = "<h4>" ++ (toString s) ++ "</h4>\n" ++ (toString ts)
+toString ((H5 s):ts) = "<h5>" ++ (toString s) ++ "</h5>\n" ++ (toString ts)
+toString ((H6 s):ts) = "<h6>" ++ (toString s) ++ "</h6>\n" ++ (toString ts)
 toString (HR:ts) = "<hr />\n" ++ (toString ts)
 toString ((Img src):ts) = "<p><img src=\"" ++ src ++ "\"/></p>\n" 
                                     ++ (toString ts)

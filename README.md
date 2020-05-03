@@ -188,4 +188,11 @@ are delineated by `,` and rows by a new line.
 
 > `___`
 
+### More Information
+
+* For more information, contact [Matthew Swanson on Github](https://github.com/swansonmp).
+
+### License
+
+* [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
