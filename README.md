@@ -3,11 +3,14 @@
 * `mdconvert` is a Markdown conversion tool
 with extra features and special syntax.
 
-## Compiling mdconvert
+### Compiling mdconvert
 
 * Source code can be compiled via `ghc`:
 
 > `ghc mdconvert`
+
+* Alternatively, an executable of the latest version
+has been provided.
 
 ## Using mdconvert
 
