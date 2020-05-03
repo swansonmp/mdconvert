@@ -47,7 +47,7 @@ How about an ordered list?
 
 Then a link:
 
-Links can be [["https://github.com/swansonmp/mdconvert" "inline"]]!
+Links can be [["inline" "https://github.com/swansonmp/mdconvert"]]!
 
 And an image!
 

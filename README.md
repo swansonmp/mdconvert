@@ -126,9 +126,11 @@ followed by a `.` and a space.
 
 ### Links
 
-* I sure hope I put something here later!
+* Links have been modified in `mdconvert`.
+* Links are surrounded by double-brackets (`[[ ]]`)
+and contain the text in quotes followed by the source in quotes.
 
-> `[["https://github.com/swansonmp/mdconvert" "mdconvert"]]`
+> `I love [["mdconvert" "https://github.com/swansonmp/mdconvert"]]!`
 
 ### Multimedia
 

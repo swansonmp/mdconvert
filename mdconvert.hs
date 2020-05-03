@@ -1,7 +1,7 @@
 -- mdconvert
 -- Matthew Swanson
 
-import Data.List (intercalate)
+import Data.List (intercalate, elemIndices)
 import Data.List.Split (splitOn)
 import Data.Char (isSpace, isDigit)
 import System.IO
@@ -64,6 +64,7 @@ notSyntaxChar s
     | s == '_'  = False
     | s == '`'  = False 
     | s == '~'  = False 
+    | s == '['  = False
     | otherwise = True
 
 isSyntaxSymbol :: String -> Bool
@@ -82,6 +83,16 @@ getTagName s
     | s == "~~" = "strike"
     | otherwise = error "getTagName: Invalid input"
 
+getHref :: String -> String
+getHref       s = takeWhile ('"' /=) (drop ((indices !! 2) + 1) s)
+                    where indices = elemIndices '"' s
+
+getAnchorText :: String -> String
+getAnchorText s = takeWhile ('"' /=) (drop ((indices !! 0) + 1) s)
+                    where indices = elemIndices '"' s
+
+parseAnchor :: String -> String
+parseAnchor s = "<a href=\"" ++ (getHref s) ++ "\">" ++ (getAnchorText s) ++ "</a>"
 
 splitOnInlineSyntax :: String -> [String]
 splitOnInlineSyntax ""          = []
@@ -92,6 +103,14 @@ splitOnInlineSyntax ('~':'~':s) = "~~" : splitOnInlineSyntax s
 splitOnInlineSyntax ('*':s) = ('*':words) : splitOnInlineSyntax rest
                                 where (words, rest) = (takeWhile (notSyntaxChar) s, dropWhile (notSyntaxChar) s)
 splitOnInlineSyntax ('~':s) = ('~':words) : splitOnInlineSyntax rest
+                                where (words, rest) = (takeWhile (notSyntaxChar) s, dropWhile (notSyntaxChar) s)
+splitOnInlineSyntax ('[':'[':s) = if rest /= ""
+                                    then if length rest > 1 && (rest !! 1) == ']'
+                                        then (parseAnchor words) : splitOnInlineSyntax (tail (tail rest))
+                                        else "[[" : splitOnInlineSyntax s
+                                    else "[[" : splitOnInlineSyntax s
+                                            where (words, rest) = (takeWhile (']' /=) s, dropWhile (']' /=) s)
+splitOnInlineSyntax ('[':s) = ('[':words) : splitOnInlineSyntax rest
                                 where (words, rest) = (takeWhile (notSyntaxChar) s, dropWhile (notSyntaxChar) s)
 splitOnInlineSyntax s       = words : splitOnInlineSyntax rest
                                 where (words, rest) = (takeWhile (notSyntaxChar) s, dropWhile (notSyntaxChar) s)
@@ -159,12 +178,12 @@ parseTable s = Table (tail (map parseTableRow (lines s)))
 
 -- Converts a single string into a token, producing error on non-tokens
 readBlock :: String -> Tag
-readBlock ('#':'#':'#':'#':'#':'#':cs) = H6 cs
-readBlock ('#':'#':'#':'#':'#':cs) = H5 cs
-readBlock ('#':'#':'#':'#':cs) = H4 cs
-readBlock ('#':'#':'#':cs) = H3 cs
-readBlock ('#':'#':cs) = H2 cs
-readBlock ('#':cs)  = H1 cs
+readBlock ('#':'#':'#':'#':'#':'#':' ':cs) = H6 cs
+readBlock ('#':'#':'#':'#':'#':' ':cs) = H5 cs
+readBlock ('#':'#':'#':'#':' ':cs) = H4 cs
+readBlock ('#':'#':'#':' ':cs) = H3 cs
+readBlock ('#':'#':' ':cs) = H2 cs
+readBlock ('#':' ':cs)  = H1 cs
 readBlock ('-':'-':'-':cs) = HR
 readBlock ('*':'*':'*':cs) = HR
 readBlock ('_':'_':'_':cs) = HR
